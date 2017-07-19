@@ -41,6 +41,9 @@
                     <div class="ibox-title">
                         <h5>Gesture Panel</h5>
                         <div class="ibox-tools">
+                            <a id="gesture-num-div">
+                                0
+                            </a>
                             <a id="collapse-btn" class="collapse-link">
                                 <i class="fa fa-chevron-up"></i>
                             </a>
@@ -48,7 +51,8 @@
                     </div>
                     <div class="ibox-content">
                         <div class="row">
-                            <div id="main-description">请按照要求完成以下手势。 按下<strong>空格键</strong>开始或结束手势录制。</div>
+                            <div id="main-description">请按照要求完成以下手势。 按下<strong>空格键</strong>开始或结束手势录制。</br> 在录制过程中按下<strong>R键</strong>重新开始录制。</div>
+
                             <div id="gesture-panel">
                                 <img id="gesture-img" src="img/test.jpg">
                                 <i id="start-img" class="fa fa-5x fa-user"></i>
@@ -65,8 +69,14 @@
                                     <button id="finish-recording-btn" onclick="finish_recording()" class="btn btn-info">
                                         结束录制
                                     </button>
+                                    <button id="restart-recording-btn" onclick="restart_recording()" class="btn btn-warning">
+                                        重新开始录制
+                                    </button>
                                     <button id="start-experiment-btn" onclick="start_experiment()" class="btn btn-success">
                                         开始实验
+                                    </button>
+                                    <button id="practice-experiment-btn" onclick="practice_experiment()" class="btn btn-info">
+                                        开始练习
                                     </button>
                                 </div>
                             </div>
