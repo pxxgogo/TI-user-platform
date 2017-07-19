@@ -199,13 +199,15 @@ function get_timestamp() {
 function update_gesture() {
     if (current_log !== null)
         experiment_log_list.push(current_log);
-    // console.log(experiment_log_list);
     current_log = {};
     current_gesture_index = get_next_gesture();
     if (current_gesture_index === -1) {
         stop_experiment(1);
         return;
     }
+    $("#collapse-btn").click();
+    $("#collapse-btn").click();
+    // setTimeout(collapse_gesture_panel, 100);
     console.log("gesture index", current_gesture_index);
     $("#gesture-img").attr("src", "img/" + gesture_img_list[current_gesture_index]);
     $("#gesture-description").html(gesture_description_list[current_gesture_index]);
