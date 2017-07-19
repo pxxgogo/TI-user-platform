@@ -35,6 +35,7 @@ var timer = null;
 var max_times_per_gesture = 10;
 var gesture_times = 0;
 var experiment_start_type = 0;
+var gesture_sum = max_times_per_gesture * (gesture_max_index + 1);
 console.log("max gesture index:", gesture_max_index);
 
 $(document).ready(function () {
@@ -43,6 +44,7 @@ $(document).ready(function () {
     $("#restart-recording-btn").hide();
     $("#gesture-img").hide();
     $("#gesture-description").hide();
+    $("#progress-panel").hide();
 
 });
 
@@ -77,6 +79,7 @@ function start_experiment() {
             $("#start-img").hide();
             $("#gesture-description").show();
             $("#start-description").hide();
+            $("#progress-panel").show();
             update_gesture();
         });
 
@@ -113,6 +116,7 @@ function practice_experiment() {
             $("#start-img").hide();
             $("#gesture-description").show();
             $("#start-description").hide();
+            $("#progress-panel").show();
             update_gesture();
         });
 
@@ -162,6 +166,7 @@ function confirm_stop_experiment() {
     $("#start-img").show();
     $("#gesture-description").hide();
     $("#start-description").show();
+    $("#progress-panel").hide();
     if (experiment_start_type === 0)
         download_logs();
     experiment_log_list = [];
@@ -193,10 +198,11 @@ function download_logs() {
 
 
 function get_next_gesture() {
-    if (gesture_times >= max_times_per_gesture * (gesture_max_index + 1)) {
+    if (gesture_times >= gesture_sum) {
         return -1;
     }
-    $("#gesture-num-div").html(gesture_times + "/" + max_times_per_gesture * (gesture_max_index + 1));
+    var width = gesture_times * 100 / gesture_sum;
+    $("#progress-bar").attr("style", "width: " + width + "%");
     gesture_times += 1;
     var gesture_index = Math.floor(Math.random() * (gesture_max_index + 1));
     while (gesture_times_list[gesture_index] >= max_times_per_gesture) {
@@ -266,14 +272,18 @@ function update_gesture() {
         return;
     }
     $("#collapse-btn").click();
+    setTimeout(next_update_gesture, 400);
+}
+
+function next_update_gesture() {
     $("#collapse-btn").click();
-    // setTimeout(collapse_gesture_panel, 100);
     console.log("gesture index", current_gesture_index);
     var gesture_index_tuple = get_gesture_sub_index();
     $("#gesture-img").attr("src", "img/" + gesture_img_list[gesture_index_tuple[1]]);
     $("#gesture-description").html(gesture_description_list[gesture_index_tuple[1]] + "</br>" + strength_list[gesture_index_tuple[0]]);
     current_log["gesture_index"] = gesture_index_tuple[1];
     current_log["strength_type"] = gesture_index_tuple[0];
+
 }
 
 $(document).keypress(function (e) {
