@@ -15,23 +15,24 @@ var gesture_description_list = [
     "用食指在空中点击",
     "用食指画圈",
     "写字",
-    "字母 O 的手势 (O)",
-    "竖起拇指，左右摇动 (10)",
-    "数字 6 的手势 (Y)",
-    "食指、中指交叉 (R)",
-    "OK 的手势 (F)",
-    "手腕略向下弯曲，拇指和食指指向下 (Q)"];
+    "字母 O 的手势",
+    "竖起拇指，左右摇动",
+    "数字 6 的手势",
+    "食指、中指交叉",
+    "OK 的手势",
+    "手腕略向下弯曲，拇指和食指指向下"];
+var strength_list = ["不用力", "<strong>手</strong>用力", "<strong>前臂</strong>用力"];
 
 var gesture_times_list = [];
 var current_gesture_index = -1;
 var experiment_start_flag = false;
 var gesture_record_flag = false;
-var gesture_max_index = gesture_description_list.length - 1;
+var gesture_max_index = gesture_description_list.length * strength_list.length - 1;
 var experiment_log_list = [];
 var current_log = null;
 var user_name = "";
 var timer = null;
-var max_times_per_gesture = 15;
+var max_times_per_gesture = 1;
 var gesture_times = 0;
 console.log("max gesture index:", gesture_max_index);
 
@@ -131,18 +132,18 @@ function stop_experiment(flag) {
 }
 
 function init_gesture_times_list() {
-    for (var i = 0; i < gesture_description_list.length; i++)
+    for (var i = 0; i <= gesture_max_index; i++)
         gesture_times_list.push(0);
     gesture_times = 0;
 
 }
 
 function download_logs() {
-    var text = "gesture_index, start_time, finish_time\n";
+    var text = "gesture_index, strength_type, start_time, finish_time\n";
     for (var i = 0; i < experiment_log_list.length; i++) {
         var log = experiment_log_list[i];
         console.log(log);
-        text += log["gesture_index"] + ", " + log["start_time"] + ", " + log["finish_time"] + "\n";
+        text += log["gesture_index"] + ", " + log["strength_type"] + ", " +  log["start_time"] + ", " + log["finish_time"] + "\n";
     }
     saveAs(
         new Blob(
@@ -196,6 +197,16 @@ function get_timestamp() {
     return Date.now();
 }
 
+function get_gesture_sub_index() {
+    var gesture_strength_index = 0;
+    var gesture_sub_index = current_gesture_index;
+    while(gesture_sub_index >= gesture_img_list.length) {
+        gesture_strength_index++;
+        gesture_sub_index -= gesture_img_list.length;
+    }
+    return [gesture_strength_index, gesture_sub_index]
+}
+
 function update_gesture() {
     if (current_log !== null)
         experiment_log_list.push(current_log);
@@ -209,9 +220,11 @@ function update_gesture() {
     $("#collapse-btn").click();
     // setTimeout(collapse_gesture_panel, 100);
     console.log("gesture index", current_gesture_index);
-    $("#gesture-img").attr("src", "img/" + gesture_img_list[current_gesture_index]);
-    $("#gesture-description").html(gesture_description_list[current_gesture_index]);
-    current_log["gesture_index"] = current_gesture_index;
+    var gesture_index_tuple = get_gesture_sub_index();
+    $("#gesture-img").attr("src", "img/" + gesture_img_list[gesture_index_tuple[1]]);
+    $("#gesture-description").html(gesture_description_list[gesture_index_tuple[1]] + "</br>" + strength_list[gesture_index_tuple[0]]);
+    current_log["gesture_index"] = gesture_index_tuple[1];
+    current_log["strength_type"] = gesture_index_tuple[0];
 }
 
 $(document).keypress(function (e) {
