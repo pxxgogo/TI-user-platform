@@ -240,10 +240,10 @@ function restart_recording() {
     if (!experiment_start_flag || !gesture_record_flag)
         return -1;
     console.log("restart recording");
-    $("#collapse-btn").click();
-    $("#collapse-btn").click();
-    current_log["start_time"] = get_timestamp();
-    gesture_record_flag = true;
+    gesture_record_flag = false;
+    $("#start-recording-btn").show();
+    $("#finish-recording-btn").hide();
+    $("#restart-recording-btn").hide();
 }
 
 
