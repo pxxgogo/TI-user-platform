@@ -9,19 +9,31 @@ var gesture_description_list = [
     "五指张开，“擦玻璃”",
     "五指张开，手掌左右扇动",
     "五指张开，手掌前后反转",
-    "手张开->握拳",
-    "手握拳->张开",
+    "手放松->握拳->直接放松",
+    "手放松->握拳->恢复自然状",
     "用食指指点：从前方指向右前方，再回到前方",
     "用食指在空中点击",
     "用食指画圈",
     "写字",
-    "字母 O 的手势",
-    "竖起拇指，左右摇动",
-    "数字 6 的手势",
-    "食指、中指交叉",
-    "OK 的手势",
-    "手腕略向下弯曲，拇指和食指指向下"];
-var strength_list = ["<strong>放松</strong>", "<strong>手用力</strong>", "<strong>前臂用力</strong>"];
+    "字母 O 的手势 (O)",
+    "竖起拇指，左右摇动 (10)",
+    "数字 6 的手势 (Y)",
+    "食指、中指交叉 (R)",
+    "OK 的手势 (F)",
+    "手腕略向下弯曲，拇指和食指指向下 (Q)",
+    "八字形",
+    "手放松->张开",
+    "手握拳->张开",
+    "手张开->握拳",
+    "手指捏着移动",
+    "捏着->张开",
+    "握拳夹着拇指（中指无名指）",
+    "握拳夹着拇指（食指中指）",
+    "非常6+1",
+    "握手机"];
+
+
+var strength_list = ["<strong>手用力</strong>"];
 
 var gesture_times_list = [];
 var current_gesture_index = -1;
@@ -32,10 +44,11 @@ var experiment_log_list = [];
 var current_log = null;
 var user_name = "";
 var timer = null;
-var max_times_per_gesture = 10;
+var MAX_TIMES_PER_GESTURE = 25;
+var max_times_per_gesture = MAX_TIMES_PER_GESTURE;
 var gesture_times = 0;
 var experiment_start_type = 0;
-var gesture_sum = 601;
+var gesture_sum = max_times_per_gesture * (gesture_max_index + 1);
 console.log("max gesture index:", gesture_max_index);
 var INTERVAL_TIME = 2000;
 
@@ -64,7 +77,7 @@ function start_experiment() {
                 return;
             }
             experiment_start_type = 0;
-            max_times_per_gesture = 10;
+            max_times_per_gesture = MAX_TIMES_PER_GESTURE;
             init_gesture_times_list();
             console.log("max_times_per_gesture", max_times_per_gesture);
             user_name = $("#user-name-input").val();
@@ -176,6 +189,7 @@ function init_gesture_times_list() {
     for (var i = 0; i <= gesture_max_index; i++)
         gesture_times_list.push(0);
     gesture_times = 0;
+    current_gesture_index = 0;
 
 }
 
@@ -199,24 +213,31 @@ function download_logs() {
 
 function get_next_gesture() {
     if (gesture_times >= gesture_sum) {
-        return -1;
+        current_gesture_index = -1;
     }
+    console.log("gesture_times:", gesture_times);
     var width = gesture_times * 100 / gesture_sum;
     $("#progress-bar").attr("style", "width: " + width + "%");
     $("#progress-bar").html(gesture_times);
     gesture_times += 1;
-    var gesture_index = Math.floor(Math.random() * (gesture_max_index + 1));
-    while (gesture_times_list[gesture_index] >= max_times_per_gesture) {
-        gesture_index = Math.floor(Math.random() * (gesture_max_index + 1));
+    // var gesture_index = Math.floor(Math.random() * (gesture_max_index + 1));
+    // while (gesture_times_list[gesture_index] >= max_times_per_gesture) {
+    //     gesture_index = Math.floor(Math.random() * (gesture_max_index + 1));
+    // }
+    console.log("current_times:", gesture_times_list[current_gesture_index]);
+    gesture_times_list[current_gesture_index] += 1;
+    if(gesture_times_list[current_gesture_index] > max_times_per_gesture) {
+        current_gesture_index += 1;
+        gesture_times_list[current_gesture_index] += 1;
+        return 1;
     }
-    gesture_times_list[gesture_index] += 1;
-    return gesture_index;
+    return 0;
 }
 
 function start_recording() {
     if (!experiment_start_flag || gesture_record_flag)
         return -1;
-    console.log("start recording");
+    // console.log("start recording");
     $("#start-recording-btn").hide();
     // $("#finish-recording-btn").show();
     $("#restart-recording-btn").show();
@@ -228,15 +249,16 @@ function start_recording() {
 function finish_recording() {
     if (!experiment_start_flag || !gesture_record_flag)
         return -1;
-    console.log("finish recording");
-    console.log("-----------------");
+    // console.log("finish recording");
+    // console.log("-----------------");
     $("#start-recording-btn").show();
     $("#finish-recording-btn").hide();
     $("#restart-recording-btn").hide();
     gesture_record_flag = false;
     current_log["finish_time"] = get_timestamp();
-    update_gesture();
-    start_recording();
+    var flag = update_gesture();
+    if(flag === 0)
+        start_recording();
 }
 
 function restart_recording() {
@@ -258,9 +280,9 @@ function get_timestamp() {
 function get_gesture_sub_index() {
     var gesture_strength_index = 0;
     var gesture_sub_index = current_gesture_index;
-    while (gesture_sub_index >= gesture_img_list.length) {
+    while (gesture_sub_index >= gesture_description_list.length) {
         gesture_strength_index++;
-        gesture_sub_index -= gesture_img_list.length;
+        gesture_sub_index -= gesture_description_list.length;
     }
     return [gesture_strength_index, gesture_sub_index]
 }
@@ -269,20 +291,21 @@ function update_gesture() {
     if (current_log !== null)
         experiment_log_list.push(current_log);
     current_log = {};
-    current_gesture_index = get_next_gesture();
+    var flag = get_next_gesture();
     if (current_gesture_index === -1) {
         stop_experiment(1);
         return;
     }
     $("#collapse-btn").click();
     setTimeout(next_update_gesture, 400);
+    return flag;
 }
 
 function next_update_gesture() {
     $("#collapse-btn").click();
     console.log("gesture index", current_gesture_index);
     var gesture_index_tuple = get_gesture_sub_index();
-    $("#gesture-img").attr("src", "img/" + gesture_img_list[gesture_index_tuple[1]]);
+    // $("#gesture-img").attr("src", "img/" + gesture_img_list[gesture_index_tuple[1]]);
     $("#gesture-description").html(gesture_description_list[gesture_index_tuple[1]] + "</br>" + strength_list[gesture_index_tuple[0]]);
     current_log["gesture_index"] = gesture_index_tuple[1];
     current_log["strength_type"] = gesture_index_tuple[0];
