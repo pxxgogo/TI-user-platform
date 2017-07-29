@@ -35,7 +35,7 @@ var timer = null;
 var max_times_per_gesture = 10;
 var gesture_times = 0;
 var experiment_start_type = 0;
-var gesture_sum = 1000;
+var gesture_sum = 601;
 console.log("max gesture index:", gesture_max_index);
 var INTERVAL_TIME = 2000;
 
@@ -46,7 +46,6 @@ $(document).ready(function () {
     $("#gesture-img").hide();
     $("#gesture-description").hide();
     $("#progress-panel").hide();
-
 });
 
 function start_experiment() {
@@ -204,6 +203,7 @@ function get_next_gesture() {
     }
     var width = gesture_times * 100 / gesture_sum;
     $("#progress-bar").attr("style", "width: " + width + "%");
+    $("#progress-bar").html(gesture_times);
     gesture_times += 1;
     var gesture_index = Math.floor(Math.random() * (gesture_max_index + 1));
     while (gesture_times_list[gesture_index] >= max_times_per_gesture) {
@@ -218,7 +218,7 @@ function start_recording() {
         return -1;
     console.log("start recording");
     $("#start-recording-btn").hide();
-    $("#finish-recording-btn").show();
+    // $("#finish-recording-btn").show();
     $("#restart-recording-btn").show();
     gesture_record_flag = true;
     current_log["start_time"] = get_timestamp();
@@ -296,7 +296,7 @@ $(document).keypress(function (e) {
     var key = e.which;
     if (key === 32) {
         if (gesture_record_flag) {
-            finish_recording();
+            // finish_recording();
         } else {
             start_recording();
         }
