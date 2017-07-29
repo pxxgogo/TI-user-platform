@@ -186,6 +186,7 @@ function confirm_stop_experiment() {
 }
 
 function init_gesture_times_list() {
+    gesture_times_list = [];
     for (var i = 0; i <= gesture_max_index; i++)
         gesture_times_list.push(0);
     gesture_times = 0;
