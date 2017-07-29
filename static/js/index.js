@@ -50,7 +50,7 @@ var gesture_times = 0;
 var experiment_start_type = 0;
 var gesture_sum = max_times_per_gesture * (gesture_max_index + 1);
 console.log("max gesture index:", gesture_max_index);
-var INTERVAL_TIME = 2000;
+var INTERVAL_TIME = 1500;
 
 $(document).ready(function () {
     $("#start-recording-btn").hide();
@@ -93,7 +93,7 @@ function start_experiment() {
             $("#gesture-description").show();
             $("#start-description").hide();
             $("#progress-panel").show();
-            update_gesture();
+            update_gesture(true);
         });
 
 }
@@ -130,7 +130,7 @@ function practice_experiment() {
             $("#gesture-description").show();
             $("#start-description").hide();
             $("#progress-panel").show();
-            update_gesture();
+            update_gesture(true);
         });
 
 }
@@ -227,7 +227,7 @@ function get_next_gesture() {
     // }
     console.log("current_times:", gesture_times_list[current_gesture_index]);
     gesture_times_list[current_gesture_index] += 1;
-    if(gesture_times_list[current_gesture_index] > max_times_per_gesture) {
+    if (gesture_times_list[current_gesture_index] > max_times_per_gesture) {
         current_gesture_index += 1;
         gesture_times_list[current_gesture_index] += 1;
         return 1;
@@ -257,9 +257,8 @@ function finish_recording() {
     $("#restart-recording-btn").hide();
     gesture_record_flag = false;
     current_log["finish_time"] = get_timestamp();
-    var flag = update_gesture();
-    if(flag === 0)
-        start_recording();
+    update_gesture(false);
+
 }
 
 function restart_recording() {
@@ -288,7 +287,7 @@ function get_gesture_sub_index() {
     return [gesture_strength_index, gesture_sub_index]
 }
 
-function update_gesture() {
+function update_gesture(start_tag) {
     if (current_log !== null)
         experiment_log_list.push(current_log);
     current_log = {};
@@ -297,19 +296,28 @@ function update_gesture() {
         stop_experiment(1);
         return;
     }
-    $("#collapse-btn").click();
-    setTimeout(next_update_gesture, 400);
-    return flag;
+    $("#gesture-img").attr("src", "img/stop.png");
+    // $("#collapse-btn").click();
+    setTimeout(function () {
+        if (start_tag) {
+            next_update_gesture(1);
+        } else {
+            next_update_gesture(flag);
+        }
+    }, 800);
 }
 
-function next_update_gesture() {
-    $("#collapse-btn").click();
+function next_update_gesture(flag) {
+    // $("#collapse-btn").click();
+    $("#gesture-img").attr("src", "img/test.jpg");
     console.log("gesture index", current_gesture_index);
     var gesture_index_tuple = get_gesture_sub_index();
     // $("#gesture-img").attr("src", "img/" + gesture_img_list[gesture_index_tuple[1]]);
     $("#gesture-description").html(gesture_description_list[gesture_index_tuple[1]] + "</br>" + strength_list[gesture_index_tuple[0]]);
     current_log["gesture_index"] = gesture_index_tuple[1];
     current_log["strength_type"] = gesture_index_tuple[0];
+    if (flag === 0)
+        start_recording();
 
 }
 
