@@ -35,8 +35,9 @@ var timer = null;
 var max_times_per_gesture = 10;
 var gesture_times = 0;
 var experiment_start_type = 0;
-var gesture_sum = max_times_per_gesture * (gesture_max_index + 1);
+var gesture_sum = 1000;
 console.log("max gesture index:", gesture_max_index);
+var INTERVAL_TIME = 2000;
 
 $(document).ready(function () {
     $("#start-recording-btn").hide();
@@ -221,6 +222,7 @@ function start_recording() {
     $("#restart-recording-btn").show();
     gesture_record_flag = true;
     current_log["start_time"] = get_timestamp();
+    setTimeout(finish_recording, INTERVAL_TIME);
 }
 
 function finish_recording() {
@@ -234,6 +236,7 @@ function finish_recording() {
     gesture_record_flag = false;
     current_log["finish_time"] = get_timestamp();
     update_gesture();
+    start_recording();
 }
 
 function restart_recording() {
