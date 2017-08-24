@@ -39,7 +39,8 @@ var gesture_description_list = [
 ];
 
 
-var STRENGTH_LIST = ["<strong>用力</strong>"];
+var STRENGTH_LIST = ["<strong>用力</strong>", "<strong>自然</strong>"];
+var PAUSE_TIME_LIST = [2000, 500];
 
 var gesture_times_list = [];
 var gesture_index_g = -1;
@@ -49,7 +50,7 @@ var GESTURE_MAX_INDEX = gesture_description_list.length * STRENGTH_LIST.length -
 var experiment_log_list_g = [];
 var current_log_g = null;
 var user_name_g = "";
-var MAX_TIMES_PER_GESTURE_EXPERIMENT = 15;
+var MAX_TIMES_PER_GESTURE_EXPERIMENT = 1;
 var max_times_per_gesture_g = MAX_TIMES_PER_GESTURE_EXPERIMENT;
 var gesture_times_g = 0;
 var experiment_start_type_g = 0;
@@ -326,6 +327,7 @@ function update_gesture(start_tag) {
     }
     // show the "stop" image
     $("#gesture-img").attr("src", "img/" + gesture_img_list[0]);
+    var gesture_index_tuple = get_gesture_sub_index();
     // $("#collapse-btn").click();
     setTimeout(function () {
         if (start_tag) {
@@ -333,7 +335,7 @@ function update_gesture(start_tag) {
         } else {
             next_update_gesture(flag);
         }
-    }, 2000);
+    }, PAUSE_TIME_LIST[gesture_index_tuple[0]]);
 }
 
 function next_update_gesture(flag) {
