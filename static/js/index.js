@@ -14,7 +14,7 @@ var gesture_description_list = [
     "手呈张开状",
     "手臂放在扶手上",
     "手臂竖直下垂",
-    "手指点状，手臂自然移动",
+    "手指点状，手臂移动",
     "向背后指点",
     "扇动手臂swipe",
     "挥舞手臂wave",
@@ -49,7 +49,7 @@ var GESTURE_MAX_INDEX = gesture_description_list.length * STRENGTH_LIST.length -
 var experiment_log_list_g = [];
 var current_log_g = null;
 var user_name_g = "";
-var MAX_TIMES_PER_GESTURE_EXPERIMENT = 20;
+var MAX_TIMES_PER_GESTURE_EXPERIMENT = 15;
 var max_times_per_gesture_g = MAX_TIMES_PER_GESTURE_EXPERIMENT;
 var gesture_times_g = 0;
 var experiment_start_type_g = 0;
@@ -333,7 +333,7 @@ function update_gesture(start_tag) {
         } else {
             next_update_gesture(flag);
         }
-    }, 800);
+    }, 2000);
 }
 
 function next_update_gesture(flag) {
