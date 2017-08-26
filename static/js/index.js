@@ -398,7 +398,6 @@ function next_update_gesture(flag) {
     current_log_g["gesture_index"] = gesture_index_tuple[1];
     current_log_g["strength_type"] = gesture_index_tuple[0];
     if (flag === 0) {
-        $("#gesture-img").attr("src", "img/" + gesture_img_list[2]);
         start_recording();
     } else {
         $("#gesture-img").attr("src", "img/" + gesture_img_list[1]);
