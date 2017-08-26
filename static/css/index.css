@@ -61,3 +61,12 @@ body {
 #progress-panel {
     margin: 5px 30px 20px 30px;
 }
+
+#record-bar-panel {
+    width: 300px;
+    margin-top: 25px;
+}
+
+.progress .progress-bar {
+    transition: unset;
+}

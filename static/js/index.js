@@ -48,15 +48,23 @@ var experiment_start_flag_g = false;
 var gesture_record_flag_g = false;
 var GESTURE_MAX_INDEX = gesture_description_list.length * STRENGTH_LIST.length - 1;
 var experiment_log_list_g = [];
+var experiment_log_list_per_gesture_g = [];
 var current_log_g = null;
 var user_name_g = "";
-var MAX_TIMES_PER_GESTURE_EXPERIMENT = 1;
+var MAX_TIMES_PER_GESTURE_EXPERIMENT = 15;
 var max_times_per_gesture_g = MAX_TIMES_PER_GESTURE_EXPERIMENT;
 var gesture_times_g = 0;
 var experiment_start_type_g = 0;
 var gesture_sum_g = max_times_per_gesture_g * (GESTURE_MAX_INDEX + 1);
 console.log("max gesture index:", GESTURE_MAX_INDEX);
 var INTERVAL_TIME = 1500;
+var restart_flag_g = false;
+
+// document.getElementById("progress-bar").style.width = "0%";
+// $("#progress").show();
+// var wordsNum = inputWindowText.length;
+// $("#progress-bar").animate({width: '100%'}, wordsNum * tip);
+
 
 $(document).ready(function () {
     $("#start-recording-btn").hide();
@@ -66,6 +74,7 @@ $(document).ready(function () {
     $("#gesture-description").hide();
     $("#progress-panel").hide();
     $("#gesture-img").attr("src", "img/" + gesture_img_list[1]);
+    $("#record-bar-panel").hide();
 });
 
 function start_experiment() {
@@ -105,10 +114,12 @@ function confirm_start_experiment() {
     $("#user-name-input").val("");
     console.log("user name:", user_name_g);
     experiment_log_list_g = [];
+    experiment_log_list_per_gesture_g = [];
     experiment_start_flag_g = true;
-    $("#start-recording-btn").show();
     $("#start-experiment-btn").hide();
     $("#practice-experiment-btn").hide();
+    $("#record-bar-panel").show();
+    document.getElementById("record-bar").style.width = "0%";
     $("#gesture-img").show();
     $("#start-img").hide();
     $("#gesture-description").show();
@@ -141,10 +152,12 @@ function practice_experiment() {
             $("#user-name-input").val("");
             console.log("user name:", user_name_g);
             experiment_log_list_g = [];
+            experiment_log_list_per_gesture_g = [];
             experiment_start_flag_g = true;
-            $("#start-recording-btn").show();
             $("#start-experiment-btn").hide();
             $("#practice-experiment-btn").hide();
+            $("#record-bar-panel").show();
+            document.getElementById("record-bar").style.width = "0%";
             $("#gesture-img").show();
             $("#start-img").hide();
             $("#gesture-description").show();
@@ -204,6 +217,7 @@ function confirm_stop_experiment() {
     if (experiment_start_type_g === 0)
         download_logs();
     experiment_log_list_g = [];
+    experiment_log_list_per_gesture_g = [];
 }
 
 function init_gesture_times_list() {
@@ -218,9 +232,12 @@ function init_gesture_times_list() {
 function download_logs() {
     var text = "gesture_index, strength_type, start_time, finish_time\n";
     for (var i = 0; i < experiment_log_list_g.length; i++) {
-        var log = experiment_log_list_g[i];
-        console.log(log);
-        text += log["gesture_index"] + ", " + log["strength_type"] + ", " + log["start_time"] + ", " + log["finish_time"] + "\n";
+        var experiment_log_list_per_gesture = experiment_log_list_g[i];
+        for (var j = 0; j < experiment_log_list_per_gesture.length; j++) {
+            var log = experiment_log_list_per_gesture[j];
+            console.log(log);
+            text += log["gesture_index"] + ", " + log["strength_type"] + ", " + log["start_time"] + ", " + log["finish_time"] + "\n";
+        }
     }
     saveAs(
         new Blob(
@@ -232,6 +249,11 @@ function download_logs() {
 
 }
 
+function update_progressbar() {
+    var width = gesture_times_g * 100 / gesture_sum_g;
+    $("#progress-bar").attr("style", "width: " + width + "%");
+    $("#progress-bar").html(gesture_times_g);
+}
 
 function get_next_gesture() {
     if (gesture_times_g >= gesture_sum_g) {
@@ -240,10 +262,7 @@ function get_next_gesture() {
     }
     console.log("gesture_times_g:", gesture_times_g);
 
-    // update the progress bar
-    var width = gesture_times_g * 100 / gesture_sum_g;
-    $("#progress-bar").attr("style", "width: " + width + "%");
-    $("#progress-bar").html(gesture_times_g);
+    update_progressbar();
 
     // judge if switch gesture
     if (gesture_index_g < 0 || gesture_times_list[gesture_index_g] >= max_times_per_gesture_g) {
@@ -257,8 +276,12 @@ function get_next_gesture() {
 }
 
 function start_recording() {
-    if (!experiment_start_flag_g || gesture_record_flag_g)
+    if (!experiment_start_flag_g)
         return -1;
+    if (restart_flag_g) {
+        restart_flag_g = false;
+        return -1;
+    }
     // console.log("start recording");
     $("#start-recording-btn").hide();
     // $("#finish-recording-btn").show();
@@ -266,29 +289,39 @@ function start_recording() {
     $("#gesture-img").attr("src", "img/" + gesture_img_list[2]);
     gesture_record_flag_g = true;
     current_log_g["start_time"] = get_timestamp();
-    setTimeout(finish_recording, INTERVAL_TIME);
+    document.getElementById("record-bar").style.width = "0%";
+    $("#record-bar").attr("class", "progress-bar progress-bar-info progress-bar-striped");
+    $("#record-bar").animate({width: '100%'}, INTERVAL_TIME, 'linear', finish_recording);
+    // setTimeout(finish_recording, INTERVAL_TIME);
 }
 
 function finish_recording() {
-    if (!experiment_start_flag_g || !gesture_record_flag_g)
+    if (!experiment_start_flag_g)
         return -1;
-
+    if (restart_flag_g) {
+        restart_flag_g = false;
+        return -1;
+    }
     // console.log("finish recording");
     // console.log("-----------------");
     // $("#start-recording-btn").show();
     $("#finish-recording-btn").hide();
-    $("#restart-recording-btn").hide();
-    gesture_record_flag_g = false;
+    // $("#restart-recording-btn").hide();
     current_log_g["finish_time"] = get_timestamp();
     update_gesture(false);
 
 }
 
 function restart_recording() {
-    if (!experiment_start_flag_g || !gesture_record_flag_g)
+    if (!experiment_start_flag_g)
         return -1;
     console.log("restart recording");
     gesture_record_flag_g = false;
+    restart_flag_g = true;
+    experiment_log_list_per_gesture_g = [];
+    gesture_times_g -= gesture_times_list[gesture_index_g];
+    gesture_times_list[gesture_index_g] = 0;
+    update_progressbar();
     $("#gesture-img").attr("src", "img/" + gesture_img_list[1]);
     $("#start-recording-btn").show();
     $("#finish-recording-btn").hide();
@@ -313,7 +346,7 @@ function get_gesture_sub_index() {
 
 function update_gesture(start_tag) {
     if (current_log_g !== null)
-        experiment_log_list_g.push(current_log_g);
+        experiment_log_list_per_gesture_g.push(current_log_g);
     current_log_g = {};
     if (!start_tag) {
         gesture_times_g += 1;
@@ -321,6 +354,13 @@ function update_gesture(start_tag) {
         console.log("current_times:", gesture_times_list[gesture_index_g]);
     }
     var flag = get_next_gesture();
+    if (flag !== 0 || start_tag) {
+        if (experiment_log_list_per_gesture_g.length > 0) {
+            experiment_log_list_g.push(experiment_log_list_per_gesture_g);
+            experiment_log_list_per_gesture_g = [];
+        }
+        gesture_record_flag_g = false;
+    }
     if (flag === -1) {
         stop_experiment(1);
         return;
@@ -329,13 +369,22 @@ function update_gesture(start_tag) {
     $("#gesture-img").attr("src", "img/" + gesture_img_list[0]);
     var gesture_index_tuple = get_gesture_sub_index();
     // $("#collapse-btn").click();
-    setTimeout(function () {
+    document.getElementById("record-bar").style.width = "0%";
+    $("#record-bar").attr("class", "progress-bar progress-bar-danger progress-bar-striped");
+    $("#record-bar").animate({width: '100%'}, PAUSE_TIME_LIST[gesture_index_tuple[0]], 'linear', function () {
         if (start_tag) {
             next_update_gesture(1);
         } else {
             next_update_gesture(flag);
         }
-    }, PAUSE_TIME_LIST[gesture_index_tuple[0]]);
+    });
+    // setTimeout(function () {
+    //     if (start_tag) {
+    //         next_update_gesture(1);
+    //     } else {
+    //         next_update_gesture(flag);
+    //     }
+    // }, PAUSE_TIME_LIST[gesture_index_tuple[0]]);
 }
 
 function next_update_gesture(flag) {
@@ -353,6 +402,7 @@ function next_update_gesture(flag) {
         start_recording();
     } else {
         $("#gesture-img").attr("src", "img/" + gesture_img_list[1]);
+        $("#restart-recording-btn").hide();
     }
 
 }
