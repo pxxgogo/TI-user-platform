@@ -369,9 +369,8 @@ function update_gesture(start_tag) {
     $("#gesture-img").attr("src", "img/" + gesture_img_list[0]);
     var gesture_index_tuple = get_gesture_sub_index();
     // $("#collapse-btn").click();
-    document.getElementById("record-bar").style.width = "0%";
     $("#record-bar").attr("class", "progress-bar progress-bar-danger progress-bar-striped");
-    $("#record-bar").animate({width: '100%'}, PAUSE_TIME_LIST[gesture_index_tuple[0]], 'linear', function () {
+    $("#record-bar").animate({width: '0%'}, PAUSE_TIME_LIST[gesture_index_tuple[0]], 'linear', function () {
         if (start_tag) {
             next_update_gesture(1);
         } else {
